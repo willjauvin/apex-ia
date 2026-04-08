@@ -20,4 +20,3 @@ export async function ai(prompt: string, mode: string) {
       return await groqChat(prompt)
   }
 }
-
