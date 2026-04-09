@@ -9,7 +9,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Message manquant" }, { status: 400 })
     }
 
-    // Appel à ton moteur IA centralisé
     const result = await runAI({
       type: "chat",
       prompt: message
