@@ -11,6 +11,10 @@ export async function runAI({
   prompt: any
 }) {
   switch (type) {
+    // --- Chat IA général ---
+    case "chat":
+      return await groqChat(prompt)
+
     // --- Génération de boutique / produits / collections ---
     case "store":
     case "product":

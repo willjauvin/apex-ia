@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { runAI } from "@/lib/ai/orchestrator"
 
 export async function POST(req: Request) {
   try {
@@ -8,35 +9,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Message manquant" }, { status: 400 })
     }
 
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      return NextResponse.json({ error: "Clé API manquante" }, { status: 500 })
-    }
+    // Appel à ton moteur IA centralisé
+    const result = await runAI({
+      type: "chat",
+      prompt: message
+    })
 
-    // Appel à l'API Gemini
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: message }]
-            }
-          ]
-        })
-      }
-    )
-
-    const data = await response.json()
-
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Désolé, je n'ai pas pu générer une réponse."
-
-    return NextResponse.json({ reply })
+    return NextResponse.json({
+      reply: typeof result === "string" ? result : JSON.stringify(result)
+    })
   } catch (error) {
     console.error("Erreur API:", error)
     return NextResponse.json({ error: "Erreur interne" }, { status: 500 })
