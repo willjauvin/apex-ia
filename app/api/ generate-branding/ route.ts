@@ -1,23 +1,28 @@
 import { NextResponse } from "next/server"
+import { runAI } from "@/lib/ai/orchestrator"
 
 export async function POST(req: Request) {
   try {
     const { prompt } = await req.json()
 
+    // Appel à ton moteur IA centralisé
+    const result = await runAI({
+      type: "branding",
+      prompt
+    })
+
     return NextResponse.json({
       success: true,
       type: "branding",
       prompt,
-      data: {
-        colors: [],
-        typography: "",
-        style: "",
-        logo: null
-      }
+      data: result
     })
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Erreur inconnue" },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Erreur inconnue"
+      },
       { status: 500 }
     )
   }
