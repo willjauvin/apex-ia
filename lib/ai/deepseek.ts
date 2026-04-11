@@ -7,12 +7,15 @@ export async function deepseekChat(prompt: string) {
     },
     body: JSON.stringify({
       model: "deepseek-chat",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7
+      messages: [
+        { role: "user", content: prompt }
+      ],
+      stream: false
     })
   })
-console.log("DeepSeek KEY:", process.env.DEEPSEEK_API_KEY)
 
   const data = await response.json()
-  return data.choices[0].message.content
+
+  // Nouvelle structure DeepSeek
+  return data.choices?.[0]?.message?.content || "Erreur : réponse vide de DeepSeek"
 }
