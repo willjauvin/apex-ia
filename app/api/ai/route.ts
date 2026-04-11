@@ -18,6 +18,9 @@ export async function POST(req: Request) {
   // On récupère l’historique
   const history = await getMessages(convId)
 
+  // Limite automatique : garder seulement les 20 derniers messages
+  const limitedHistory = history.slice(-20)
+
   // On construit un prompt contextuel
   const prompt = history.map(m => `${m.role}: ${m.content}`).join("\n")
 
