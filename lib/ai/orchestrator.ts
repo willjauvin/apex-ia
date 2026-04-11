@@ -9,31 +9,69 @@ export async function runAI({
   type: string
   prompt: any
 }) {
-  switch (type) {
-    // --- Chat IA général ---
-    case "chat":
-      return await deepseekChat(prompt)
+  // Types “classiques” → on passe par la stratégie intelligente
+  if (
+    type === "chat" ||
+    type === "store" ||
+    type === "product" ||
+    type === "collection" ||
+    type === "branding" ||
+    type === "website" ||
+    type === "content" ||
+    type === "images"
+  ) {
+    return await smartChat(prompt, type)
+  }
 
-    // --- Génération de boutique / produits / collections ---
-    case "store":
-    case "product":
-    case "collection":
-      return await deepseekChat(prompt)
+  // --- HuggingFace : extraction de données ---
+  if (type === "extract") return await hfExtract(prompt)
 
-    // --- Branding / Website ---
-    case "branding":
-    case "website":
-      return await geminiChat(prompt)
+  // --- HuggingFace : embeddings ---
+  if (type === "embed") return await hfEmbed(prompt)
 
-    // --- Contenu long / SEO ---
-    case "content":
-      return await deepseekChat(prompt)
+  // --- HuggingFace : classification ---
+  if (type === "classify") return await hfClassify(prompt)
 
-    // --- Images ---
-    case "images":
-      return await deepseekChat(prompt)
+  // --- HuggingFace : résumé ---
+  if (type === "summarize") return await hfSummarize(prompt)
 
-    // --- HuggingFace : extraction de données ---
+  // --- HuggingFace : chat open-source ---
+  if (type === "hf-chat") return await hfChat(prompt)
+
+  // Fallback global
+  return await smartChat(prompt, type)
+}
+
+async function smartChat(prompt: string, type: string) {
+  // 1) DeepSeek en priorité
+  try {
+    return await deepseekChat(prompt)
+  } catch (err: any) {
+    console.warn("DeepSeek failed:", err?.message || err)
+
+    // Si c’est un problème de balance, on log clairement
+    if (err?.message?.includes("Insufficient Balance")) {
+      console.warn("DeepSeek: solde insuffisant, bascule vers Gemini.")
+    }
+  }
+
+  // 2) Gemini en fallback
+  try {
+    return await geminiChat(prompt)
+  } catch (err: any) {
+    console.warn("Gemini failed:", err?.message || err)
+  }
+
+  // 3) HuggingFace en dernier recours
+  try {
+    return await hfChat(prompt)
+  } catch (err: any) {
+    console.warn("HuggingFace failed:", err?.message || err)
+  }
+
+  // Si tout échoue
+  return "Tous les modèles ont échoué (DeepSeek, Gemini, HuggingFace)."
+}
     case "extract":
       return await hfExtract(prompt)
 
