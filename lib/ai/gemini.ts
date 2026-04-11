@@ -7,3 +7,4 @@ export async function geminiChat(prompt: string) {
   const result = await model.generateContent(prompt)
   return result.response.text()
 }
+
