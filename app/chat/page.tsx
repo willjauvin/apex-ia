@@ -5,24 +5,36 @@ import { useState } from "react"
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([])
   const [input, setInput] = useState("")
+  const [conversationId, setConversationId] = useState<string | null>(null)
 
   async function sendMessage() {
     if (!input.trim()) return
 
+    // Ajout du message utilisateur dans l’UI
     const userMessage = { role: "user", content: input }
     setMessages((prev) => [...prev, userMessage])
-    setInput("")
 
     const response = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: input })
+      body: JSON.stringify({
+        message: input,
+        conversationId: conversationId
+      })
     })
 
     const data = await response.json()
 
+    // Si c’est la première réponse → on sauvegarde la conversation
+    if (!conversationId) {
+      setConversationId(data.conversationId)
+    }
+
+    // Ajout du message IA dans l’UI
     const aiMessage = { role: "assistant", content: data.reply }
     setMessages((prev) => [...prev, aiMessage])
+
+    setInput("")
   }
 
   return (
@@ -66,4 +78,3 @@ export default function ChatPage() {
     </main>
   )
 }
-
