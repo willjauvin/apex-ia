@@ -72,27 +72,3 @@ async function smartChat(prompt: string, type: string) {
   // Si tout échoue
   return "Tous les modèles ont échoué (DeepSeek, Gemini, HuggingFace)."
 }
-    case "extract":
-      return await hfExtract(prompt)
-
-    // --- HuggingFace : embeddings ---
-    case "embed":
-      return await hfEmbed(prompt)
-
-    // --- HuggingFace : classification ---
-    case "classify":
-      return await hfClassify(prompt)
-
-    // --- HuggingFace : résumé ---
-    case "summarize":
-      return await hfSummarize(prompt)
-
-    // --- HuggingFace : chat open-source ---
-    case "hf-chat":
-      return await hfChat(prompt)
-
-    // --- Fallback ---
-    default:
-      return await deepseekChat(prompt)
-  }
-}
