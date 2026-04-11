@@ -10,12 +10,15 @@ export async function deepseekChat(prompt: string) {
       messages: [
         { role: "user", content: prompt }
       ],
+      max_tokens: 512,
+      temperature: 0.7,
       stream: false
     })
   })
 
   const data = await response.json()
 
-  // Nouvelle structure DeepSeek
-  return data.choices?.[0]?.message?.content || "Erreur : réponse vide de DeepSeek"
+  console.log("DeepSeek response:", data)
+
+  return data?.choices?.[0]?.message?.content || "Erreur : réponse vide de DeepSeek"
 }
