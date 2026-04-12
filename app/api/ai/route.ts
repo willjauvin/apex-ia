@@ -36,15 +36,15 @@ export async function POST(req: Request) {
     const longMemory = await getLongMemory(userId)
 
     // 6. On construit le prompt complet
-    const prompt =
-      (longMemory.length > 0
-        ? "Mémoire longue durée de l'utilisateur :\n" +
-          longMemory.map(m => `- ${m.key}: ${m.value}`).join("\n") +
-          "\n\n"
-        : "") +
-      "Conversation récente :\n" +
-      limitedHistory.map(m => `${m.role}: ${m.content}`).join("\n") +
-      `\nassistant:`
+   const prompt =
+  (longMemory.length > 0
+    ? "Mémoire longue durée de l'utilisateur :\n" +
+      longMemory.map(m => `- ${m.key}: ${String(m.value)}`).join("\n") +
+      "\n\n"
+    : "") +
+  "Conversation récente :\n" +
+  limitedHistory.map(m => `${m.role}: ${m.content}`).join("\n") +
+  `\nassistant:`
 
     // 7. On envoie à l’IA
     const reply = await runAI({ type: "chat", prompt })
