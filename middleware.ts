@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-export function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers
+    }
+  })
 
-  res.headers.set(
+  response.headers.set(
     "Content-Security-Policy",
     "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
   )
 
-  return res
+  return response
 }
 
 export const config = {
