@@ -14,19 +14,21 @@ export default function ChatPage() {
     const userMessage = { role: "user", content: input }
     setMessages((prev) => [...prev, userMessage])
 
+    // Envoi au backend
     const response = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: input,
-        conversationId: conversationId
+        conversationId: conversationId,
+        userId: "anonymous" // important pour la mémoire longue durée
       })
     })
 
     const data = await response.json()
 
-    // Si c’est la première réponse → on sauvegarde la conversation
-    if (!conversationId) {
+    // Mise à jour du conversationId si c’est la première réponse
+    if (!conversationId && data.conversationId) {
       setConversationId(data.conversationId)
     }
 
