@@ -1,6 +1,6 @@
 export async function geminiChat(prompt: string) {
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=" +
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
       process.env.GEMINI_API_KEY,
     {
       method: "POST",
@@ -26,3 +26,4 @@ export async function geminiChat(prompt: string) {
     "Erreur : réponse vide de Gemini"
   )
 }
+
