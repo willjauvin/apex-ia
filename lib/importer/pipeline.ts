@@ -1,5 +1,5 @@
 import { scrapePage } from "./scraper"
-import { hfExtract, hfClassify, hfSummarize } from "@/lib/huggingface"
+import { hfExtract, hfClassify, hfSummarize } from "@/lib/ai/huggingface"
 import { buildShopJson } from "./transform"
 
 type ImportContext = {
