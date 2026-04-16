@@ -24,28 +24,41 @@ export async function hfRequest(model: string, input: any) {
   return await response.json()
 }
 
+// --- Normalisation des inputs ---
+function normalizeInput(input: any): string {
+  if (typeof input === "string") return input
+  if (typeof input === "object" && input.text) {
+    // Ajoute la task dans le texte si fournie
+    if (input.task) {
+      return `Task: ${input.task}\n\nText:\n${input.text}`
+    }
+    return input.text
+  }
+  throw new Error("Invalid input format for HuggingFace model")
+}
+
 // --- Chat / Texte ---
-export async function hfChat(prompt: string) {
-  return await hfRequest("mistralai/Mistral-7B-Instruct-v0.2", prompt)
+export async function hfChat(input: any) {
+  return await hfRequest("mistralai/Mistral-7B-Instruct-v0.2", normalizeInput(input))
 }
 
 // --- Résumé ---
-export async function hfSummarize(text: string) {
-  return await hfRequest("facebook/bart-large-cnn", text)
+export async function hfSummarize(input: any) {
+  return await hfRequest("facebook/bart-large-cnn", normalizeInput(input))
 }
 
 // --- Classification ---
-export async function hfClassify(text: string) {
-  return await hfRequest("distilbert-base-uncased-finetuned-sst-2-english", text)
+export async function hfClassify(input: any) {
+  return await hfRequest("distilbert-base-uncased-finetuned-sst-2-english", normalizeInput(input))
 }
 
 // --- Extraction (NER) ---
-export async function hfExtract(text: string) {
-  return await hfRequest("dslim/bert-base-NER", text)
+export async function hfExtract(input: any) {
+  return await hfRequest("dslim/bert-base-NER", normalizeInput(input))
 }
 
 // --- Embeddings ---
-export async function hfEmbed(text: string) {
-  return await hfRequest("sentence-transformers/all-MiniLM-L6-v2", text)
+export async function hfEmbed(input: any) {
+  return await hfRequest("sentence-transformers/all-MiniLM-L6-v2", normalizeInput(input))
 }
 
