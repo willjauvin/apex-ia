@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing url" }, { status: 400 })
     }
 
-    const result = await runImportPipeline({ url, userId, shopId })
+    const result = await runImportPipeline({ url })
 
     return NextResponse.json(result)
   } catch (err) {
