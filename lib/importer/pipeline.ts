@@ -1,46 +1,48 @@
 import { scrapePage } from "./scraper"
+import { detectPlatform } from "./detect"
+import { scrapeShopify } from "./shopify"
+import { scrapeWooCommerce } from "./woocommerce"
+import { scrapeEtsy } from "./etsy"
 import { hfExtract, hfClassify, hfSummarize } from "@/lib/ai/huggingface"
 import { buildShopJson } from "./transform"
 
-type ImportContext = {
-  url: string
-  userId?: string
-  shopId?: string
-}
-
-export async function runImportPipeline(ctx: ImportContext) {
-  const { url } = ctx
-
-  // 1. Scraper
+export async function runImportPipeline({ url }: { url: string }) {
   const scraped = await scrapePage(url)
 
-  // 2. Extraction NER (produits, prix, images, etc.)
-  const extraction = await hfExtract({
-    text: scraped.text,
-    task: "product_extraction"
-  })
+  const platform = detectPlatform(scraped.html)
 
-  // 3. Classification (catégorie de boutique, plateforme)
+  let extraction
+
+  if (platform === "shopify") {
+    extraction = await scrapeShopify(url)
+  } else if (platform === "woocommerce") {
+    extraction = await scrapeWooCommerce(url)
+  } else if (platform === "etsy") {
+    extraction = await scrapeEtsy(url)
+  } else {
+    // fallback IA
+    extraction = await hfExtract({
+      text: scraped.text,
+      task: "product_extraction"
+    })
+  }
+
   const classification = await hfClassify({
     text: scraped.text,
     task: "shop_category"
   })
 
-  // 4. Résumé global
   const summary = await hfSummarize({
     text: scraped.text,
-    maxLength: 300
+    task: "summary"
   })
 
-  // 5. Transformation → JSON final
-  const json = buildShopJson({
+  return buildShopJson({
     url,
     scraped,
     extraction,
     classification,
     summary
   })
-
-  return json
 }
 
