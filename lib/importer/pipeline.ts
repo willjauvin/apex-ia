@@ -20,7 +20,6 @@ export async function runImportPipeline({ url }: { url: string }) {
   } else if (platform === "etsy") {
     extraction = await scrapeEtsy(url)
   } else {
-    // fallback IA
     extraction = await hfExtract({
       text: scraped.text,
       task: "product_extraction"

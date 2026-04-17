@@ -1,5 +1,4 @@
 export async function scrapeShopify(url: string) {
-  // Shopify expose un endpoint JSON public
   const cleanUrl = url.endsWith("/") ? url.slice(0, -1) : url
   const apiUrl = `${cleanUrl}/products.json`
 
