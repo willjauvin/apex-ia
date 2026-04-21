@@ -1,15 +1,35 @@
 import { deepseekChat } from "./deepseek"
 import { geminiChat } from "./gemini"
 import { hfChat, hfExtract, hfEmbed, hfClassify, hfSummarize } from "./huggingface"
+import { openaiImage, openaiChat } from "./openai"
+
+type PlanIA = "free" | "plus" | "pro" | "ultra"
+type PlanShops =
+  | "none"
+  | "gratuit"
+  | "starter"
+  | "pro"
+  | "entreprise"
+  | "depart"
+  | "vitrine-pro"
+  | "expert"
+  | "boutique-express"
+  | "boutique-pro"
+  | "vitrine-pack"
+  | "ia-premium"
 
 export async function runAI({
   type,
-  prompt
+  prompt,
+  planIA = "free",
+  planShops = "none"
 }: {
   type: string
   prompt: any
+  planIA?: PlanIA
+  planShops?: PlanShops
 }) {
-  // Types “classiques” → on passe par la stratégie intelligente
+  // Types texte → IA (SimpliGenIa)
   if (
     type === "chat" ||
     type === "store" ||
@@ -17,58 +37,94 @@ export async function runAI({
     type === "collection" ||
     type === "branding" ||
     type === "website" ||
-    type === "content" ||
-    type === "images"
+    type === "content"
   ) {
-    return await smartChat(prompt, type)
+    return await smartChat(prompt, planIA)
   }
 
-  // --- HuggingFace : extraction de données ---
+  // Images → plans SimpliShops
+  if (type === "images") {
+    return await smartImage(prompt, planShops)
+  }
+
   if (type === "extract") return await hfExtract(prompt)
-
-  // --- HuggingFace : embeddings ---
   if (type === "embed") return await hfEmbed(prompt)
-
-  // --- HuggingFace : classification ---
   if (type === "classify") return await hfClassify(prompt)
-
-  // --- HuggingFace : résumé ---
   if (type === "summarize") return await hfSummarize(prompt)
-
-  // --- HuggingFace : chat open-source ---
   if (type === "hf-chat") return await hfChat(prompt)
 
-  // Fallback global
-  return await smartChat(prompt, type)
+  return await smartChat(prompt, planIA)
 }
 
-async function smartChat(prompt: string, type: string) {
-  // 1) DeepSeek en priorité
-  try {
-    return await deepseekChat(prompt)
-  } catch (err: any) {
-    console.warn("DeepSeek failed:", err?.message || err)
-
-    // Si c’est un problème de balance, on log clairement
-    if (err?.message?.includes("Insufficient Balance")) {
-      console.warn("DeepSeek: solde insuffisant, bascule vers Gemini.")
+/* --------- CHAT : piloté par planIA (Free / Plus / Pro / Ultra) --------- */
+async function smartChat(prompt: string, planIA: PlanIA) {
+  // Ultra / Pro → priorité OpenAI GPT‑4o
+  if (planIA === "pro" || planIA === "ultra") {
+    try {
+      const o = await openaiChat(prompt)
+      if (o) return o
+    } catch (err) {
+      console.warn("OpenAI GPT-4o failed:", err)
     }
   }
 
-  // 2) Gemini en fallback
+  // Tous les plans → DeepSeek en priorité
   try {
-    return await geminiChat(prompt)
-  } catch (err: any) {
-    console.warn("Gemini failed:", err?.message || err)
+    const d = await deepseekChat(prompt)
+    if (d) return d
+  } catch (err) {
+    console.warn("DeepSeek failed:", err)
   }
 
-  // 3) HuggingFace en dernier recours
-  try {
-    return await hfChat(prompt)
-  } catch (err: any) {
-    console.warn("HuggingFace failed:", err?.message || err)
+  // Plus / Pro / Ultra → Gemini si dispo
+  if (planIA === "plus" || planIA === "pro" || planIA === "ultra") {
+    try {
+      const g = await geminiChat(prompt)
+      if (g && !g.includes("réponse vide")) return g
+    } catch (err) {
+      console.warn("Gemini failed:", err)
+    }
   }
 
-  // Si tout échoue
-  return "Tous les modèles ont échoué (DeepSeek, Gemini, HuggingFace)."
+  // Tous les plans → HuggingFace en dernier recours
+  try {
+    const h = await hfChat(prompt)
+    if (h) return h
+  } catch (err) {
+    console.warn("HF failed:", err)
+  }
+
+  return "⚠️ Aucun modèle n'a pu répondre pour le moment."
 }
+
+/* --------- IMAGES : piloté par planShops (SimpliShops) --------- */
+async function smartImage(prompt: string, planShops: PlanShops) {
+  const hasPremiumImage =
+    planShops === "pro" ||
+    planShops === "entreprise" ||
+    planShops === "expert" ||
+    planShops === "boutique-pro" ||
+    planShops === "ia-premium" ||
+    planShops === "vitrine-pro"
+
+  // Plans vitrine/boutique avancés → OpenAI images
+  if (hasPremiumImage) {
+    try {
+      const img = await openaiImage(prompt)
+      if (img) return img
+    } catch (err) {
+      console.warn("OpenAI image failed:", err)
+    }
+  }
+
+  // Fallback → HF (ou ton moteur image HF plus tard)
+  try {
+    const img = await hfChat(`Génère une image: ${prompt}`)
+    return img
+  } catch (err) {
+    console.warn("HF image failed:", err)
+  }
+
+  return null
+}
+
