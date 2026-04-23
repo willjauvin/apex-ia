@@ -1,9 +1,9 @@
 "use client"
-
+export default function ChatPage()
 import { useState } from "react"
 
 export const dynamic = "force-dynamic"
-export default function ChatPage() {
+ {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([])
   const [input, setInput] = useState("")
   const [conversationId, setConversationId] = useState<string | null>(null)
