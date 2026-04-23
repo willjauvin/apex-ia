@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 
+export const dynamic = "force-dynamic"
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([])
   const [input, setInput] = useState("")
