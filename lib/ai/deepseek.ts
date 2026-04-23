@@ -1,5 +1,5 @@
 export async function deepseekChat(prompt: string) {
-  const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+  const response = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -8,9 +8,7 @@ export async function deepseekChat(prompt: string) {
     body: JSON.stringify({
       model: "deepseek-chat",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 512,
-      temperature: 0.7,
-      stream: false
+      temperature: 0.7
     })
   })
 
@@ -18,9 +16,9 @@ export async function deepseekChat(prompt: string) {
   console.log("DeepSeek response:", data)
 
   if (data?.error) {
-    // On laisse l’orchestrateur décider quoi faire
     throw new Error(data.error.message || "DeepSeek error")
   }
 
   return data?.choices?.[0]?.message?.content || "Réponse vide de DeepSeek"
 }
+
