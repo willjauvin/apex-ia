@@ -1,9 +1,10 @@
 "use client"
-export default function ChatPage()
+
 import { useState } from "react"
 
 export const dynamic = "force-dynamic"
- {
+
+export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([])
   const [input, setInput] = useState("")
   const [conversationId, setConversationId] = useState<string | null>(null)
@@ -11,29 +12,25 @@ export const dynamic = "force-dynamic"
   async function sendMessage() {
     if (!input.trim()) return
 
-    // Ajout du message utilisateur dans l’UI
     const userMessage = { role: "user", content: input }
     setMessages((prev) => [...prev, userMessage])
 
-    // Envoi au backend
     const response = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: input,
         conversationId: conversationId,
-        userId: "anonymous" // important pour la mémoire longue durée
+        userId: "anonymous"
       })
     })
 
     const data = await response.json()
 
-    // Mise à jour du conversationId si c’est la première réponse
     if (!conversationId && data.conversationId) {
       setConversationId(data.conversationId)
     }
 
-    // Ajout du message IA dans l’UI
     const aiMessage = { role: "assistant", content: data.reply }
     setMessages((prev) => [...prev, aiMessage])
 
@@ -81,3 +78,4 @@ export const dynamic = "force-dynamic"
     </main>
   )
 }
+
