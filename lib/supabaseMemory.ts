@@ -65,3 +65,30 @@ export async function getLongMemory(userId: string) {
   if (error) throw error
   return data || []
 }
+
+// -------------------------
+//  Liste des conversations
+// -------------------------
+export async function listConversations(userId: string) {
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+// -------------------------
+//  Suppression conversation
+// -------------------------
+export async function deleteConversation(id: string) {
+  const { error } = await supabase
+    .from("conversations")
+    .delete()
+    .eq("id", id)
+
+  if (error) throw error
+}
+

@@ -4,13 +4,16 @@ import { useState } from "react"
 import ChatBubble from "./components/ChatBubble"
 import ChatInput from "./components/ChatInput"
 import ModeSelector from "./components/ModeSelector"
+import TypingIndicator from "./components/TypingIndicator"
 
 export const dynamic = "force-dynamic"
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([])
   const [conversationId, setConversationId] = useState<string | null>(null)
-  const [mode, setMode] = useState("chat") // ← NOUVEAU
+  const [mode, setMode] = useState("chat")
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [partialMessage, setPartialMessage] = useState("")
 
   async function sendMessage(input: string) {
     if (!input.trim()) return
@@ -19,7 +22,11 @@ export default function ChatPage() {
     const userMessage = { role: "user", content: input }
     setMessages((prev) => [...prev, userMessage])
 
-    // Envoi au backend
+    // Reset du message partiel
+    setPartialMessage("")
+    setIsStreaming(true)
+
+    // Envoi au backend (streaming)
     const response = await fetch("/api/ai", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -27,20 +34,45 @@ export default function ChatPage() {
         message: input,
         conversationId,
         userId: "anonymous",
-        mode // ← ENVOI DU MODE AU BACKEND
+        mode
       })
     })
 
-    const data = await response.json()
-
-    // Mise à jour conversationId si nouveau
-    if (!conversationId && data.conversationId) {
-      setConversationId(data.conversationId)
+    // Récupération du conversationId depuis les headers
+    const newConvId = response.headers.get("X-Conversation-Id")
+    if (newConvId && !conversationId) {
+      setConversationId(newConvId)
     }
 
-    // Ajout du message IA
-    const aiMessage = { role: "assistant", content: data.reply }
+    // Lecture du flux
+    const reader = response.body?.getReader()
+    const decoder = new TextDecoder()
+
+    if (!reader) {
+      setIsStreaming(false)
+      return
+    }
+
+    let fullMessage = ""
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      const chunk = decoder.decode(value)
+      fullMessage += chunk
+      setPartialMessage(fullMessage)
+    }
+
+    // Fin du streaming
+    setIsStreaming(false)
+
+    // Ajout du message final dans l’historique
+    const aiMessage = { role: "assistant", content: fullMessage }
     setMessages((prev) => [...prev, aiMessage])
+
+    // Reset du message partiel
+    setPartialMessage("")
   }
 
   return (
@@ -59,6 +91,14 @@ export default function ChatPage() {
         {messages.map((msg, i) => (
           <ChatBubble key={i} role={msg.role} content={msg.content} />
         ))}
+
+        {/* Message en cours de streaming */}
+        {isStreaming && partialMessage && (
+          <ChatBubble role="assistant" content={partialMessage} />
+        )}
+
+        {/* Typing indicator */}
+        {isStreaming && !partialMessage && <TypingIndicator />}
       </div>
 
       {/* Input */}
