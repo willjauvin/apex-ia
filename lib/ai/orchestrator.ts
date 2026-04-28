@@ -18,16 +18,21 @@ type PlanShops =
   | "vitrine-pack"
   | "ia-premium"
 
+/* ---------------------------------------------------------
+   🔥 1) Fonction principale : runAI
+--------------------------------------------------------- */
 export async function runAI({
   type,
   prompt,
   planIA = "free",
-  planShops = "none"
+  planShops = "none",
+  mode = "chat" // ← NOUVEAU
 }: {
   type: string
   prompt: any
   planIA?: PlanIA
   planShops?: PlanShops
+  mode?: string
 }) {
   // Types texte → IA (SimpliGenIa)
   if (
@@ -37,9 +42,13 @@ export async function runAI({
     type === "collection" ||
     type === "branding" ||
     type === "website" ||
-    type === "content"
+    type === "content" ||
+    type === "commercial" || // ← NOUVEAU
+    type === "dev" ||        // ← NOUVEAU
+    type === "branding-mode" // ← NOUVEAU
   ) {
-    return await smartChat(prompt, planIA)
+    const finalPrompt = applyModePrompt(prompt, mode)
+    return await smartChat(finalPrompt, planIA)
   }
 
   // Images → plans SimpliShops
@@ -56,7 +65,49 @@ export async function runAI({
   return await smartChat(prompt, planIA)
 }
 
-/* --------- CHAT : piloté par planIA (Free / Plus / Pro / Ultra) --------- */
+/* ---------------------------------------------------------
+   🔥 2) Application des modes IA
+--------------------------------------------------------- */
+function applyModePrompt(prompt: string, mode: string) {
+  if (mode === "commercial") {
+    return `
+Tu es un expert en vente, persuasion et communication client.
+Tu rédiges des réponses claires, convaincantes, orientées conversion.
+Tu simplifies les concepts, tu rassures, tu guides, tu proposes.
+Tu peux créer : arguments de vente, scripts, réponses aux objections, pitchs.
+Voici la demande utilisateur :
+${prompt}
+`
+  }
+
+  if (mode === "dev") {
+    return `
+Tu es un développeur senior full‑stack (Next.js, Node, TS, API, DB).
+Tu fournis du code clair, commenté, optimisé.
+Tu expliques les erreurs, tu proposes des solutions, tu améliores les architectures.
+Tu peux générer : composants, API, scripts, migrations, optimisations.
+Voici la demande utilisateur :
+${prompt}
+`
+  }
+
+  if (mode === "branding") {
+    return `
+Tu es un expert en branding, identité visuelle et marketing.
+Tu crées des noms, slogans, textes, palettes, concepts, messages puissants.
+Ton style est moderne, professionnel, cohérent et inspirant.
+Voici la demande utilisateur :
+${prompt}
+`
+  }
+
+  // Mode normal
+  return prompt
+}
+
+/* ---------------------------------------------------------
+   🔥 3) CHAT : piloté par planIA (Free / Plus / Pro / Ultra)
+--------------------------------------------------------- */
 async function smartChat(prompt: string, planIA: PlanIA) {
   // Ultra / Pro → priorité OpenAI GPT‑4o
   if (planIA === "pro" || planIA === "ultra") {
@@ -97,7 +148,9 @@ async function smartChat(prompt: string, planIA: PlanIA) {
   return "⚠️ Aucun modèle n'a pu répondre pour le moment."
 }
 
-/* --------- IMAGES : piloté par planShops (SimpliShops) --------- */
+/* ---------------------------------------------------------
+   🔥 4) IMAGES : piloté par planShops (SimpliShops)
+--------------------------------------------------------- */
 async function smartImage(prompt: string, planShops: PlanShops) {
   const hasPremiumImage =
     planShops === "pro" ||
@@ -117,7 +170,7 @@ async function smartImage(prompt: string, planShops: PlanShops) {
     }
   }
 
-  // Fallback → HF (ou ton moteur image HF plus tard)
+  // Fallback → HF
   try {
     const img = await hfChat(`Génère une image: ${prompt}`)
     return img
