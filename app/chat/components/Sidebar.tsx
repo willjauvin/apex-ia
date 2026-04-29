@@ -21,12 +21,24 @@ export default function Sidebar() {
   }, [])
 
   return (
-    <div className="w-64 bg-white border-r p-4 flex flex-col">
-      <h2 className="text-xl font-bold mb-4">Conversations</h2>
+    <div className="w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col transition-colors">
+      
+      {/* Logo */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-orange-500 shadow"></div>
+        <h2 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
+          SimpliGenIa
+        </h2>
+      </div>
 
+      {/* New chat */}
       <NewChatButton />
 
-      <div className="flex-1 overflow-y-auto mt-4 space-y-2">
+      {/* Separator */}
+      <div className="my-4 border-t border-gray-200 dark:border-gray-700"></div>
+
+      {/* Conversations */}
+      <div className="flex-1 overflow-y-auto space-y-2">
         {loading && <p className="text-gray-500">Chargement…</p>}
 
         {!loading && conversations.length === 0 && (

@@ -76,30 +76,53 @@ export default function ChatPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col p-6 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4 text-center">Chat IA</h1>
+  <main className="min-h-screen flex flex-col p-6 max-w-2xl mx-auto
+  bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100
+  transition-colors duration-300
+">
+
+
+      {/* Header premium */}
+<div className="flex flex-col items-center mb-6 animate-[fadeInUp_0.35s_ease-out]">
+  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-orange-500 shadow-lg mb-3"></div>
+
+  <h1 className="text-3xl font-extrabold bg-gradient-to-r from-blue-500 to-orange-500 bg-clip-text text-transparent">
+    SimpliGenIa
+  </h1>
+
+  <p className="text-gray-600 dark:text-gray-300 mt-1">
+    Votre assistant IA intelligent
+  </p>
+
+  <div className="w-full border-b border-gray-200 dark:border-gray-700 mt-4"></div>
+</div>
+
 
       {/* Sélecteur de mode */}
       <ModeSelector mode={mode} setMode={setMode} />
 
       {/* Zone de messages */}
-      <div className="flex-1 border rounded-lg p-4 bg-white shadow overflow-y-auto mb-4">
-        {messages.length === 0 && (
-          <p className="text-gray-500 text-center">Commencez la conversation…</p>
-        )}
+     <div className="flex-1 border rounded-xl p-6 
+  bg-white dark:bg-gray-800 
+  border-gray-200 dark:border-gray-700 
+  shadow-inner overflow-y-auto mb-4 space-y-2 transition-colors
+">
 
-        {messages.map((msg, i) => (
-          <ChatBubble key={i} role={msg.role} content={msg.content} />
-        ))}
+  {messages.length === 0 && (
+    <p className="text-gray-500 text-center">Commencez la conversation…</p>
+  )}
 
-        {/* Message en cours de streaming */}
-        {isStreaming && partialMessage && (
-          <ChatBubble role="assistant" content={partialMessage} />
-        )}
+  {messages.map((msg, i) => (
+    <ChatBubble key={i} role={msg.role} content={msg.content} />
+  ))}
 
-        {/* Typing indicator */}
-        {isStreaming && !partialMessage && <TypingIndicator />}
-      </div>
+  {isStreaming && partialMessage && (
+    <ChatBubble role="assistant" content={partialMessage} />
+  )}
+
+  {isStreaming && !partialMessage && <TypingIndicator />}
+</div>
+
 
       {/* Input */}
       <ChatInput onSend={sendMessage} />
