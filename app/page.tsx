@@ -17,7 +17,7 @@ export default function HomePage() {
         </p>
 
         <a
-          href="/chat"
+          href="/login"
           className="mt-8 px-8 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-orange-500 text-white font-semibold shadow hover:opacity-90 transition"
         >
           Démarrer maintenant

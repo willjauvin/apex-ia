@@ -3,7 +3,7 @@ import "./globals.css"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Apex IA",
+  title: "SimpliGenIa",
   description: "Assistant IA avancé pour automatiser, analyser et optimiser vos opérations."
 }
 
