@@ -12,6 +12,7 @@
     "@supabase/supabase-js": "^2.102.1",
     "autoprefixer": "10.4.16",
     "cheerio": "^1.2.0",
+    "framer-motion": "^12.38.0",
     "groq-sdk": "^1.1.2",
     "next": "^14.2.35",
     "postcss": "8.4.31",
