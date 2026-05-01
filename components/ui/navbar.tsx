@@ -26,10 +26,13 @@ export function Navbar() {
   }
 
   return (
-    <nav className="w-full backdrop-blur-xl bg-white/10 border-b border-white/10 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-      
+    <nav className="w-full sticky top-0 z-50 backdrop-blur-xl bg-[#0a0f1f]/80 border-b border-white/5 px-6 py-4 flex justify-between items-center text-white">
+
       {/* Logo */}
-      <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-orange-400 bg-clip-text text-transparent">
+      <Link
+        href="/"
+        className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-orange-400 bg-clip-text text-transparent"
+      >
         SimpliGenIa
       </Link>
 
